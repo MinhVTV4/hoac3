@@ -467,12 +467,19 @@
 
                 <!-- Content for Exercises -->
                 <div id="exercisesView" class="hidden flex-grow flex-col">
-                    <button id="generateExercisesBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg shadow-md mb-4 w-full flex items-center justify-center gap-2">
-                        <span id="generateExercisesBtnText">Tạo Bài Tập Mới</span>
-                        <div id="exercisesSpinner" class="spinner hidden border-white border-l-white"></div>
-                    </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <button id="generateTheoreticalExercisesBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg shadow-md w-full flex items-center justify-center gap-2 transition duration-200">
+                            <span id="generateTheoreticalExercisesBtnText">Tạo Bài Tập Lý Thuyết</span>
+                            <div id="theoreticalExercisesSpinner" class="spinner hidden border-white border-l-white"></div>
+                        </button>
+                        <button id="generateCalculationExercisesBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-5 rounded-lg shadow-md w-full flex items-center justify-center gap-2 transition duration-200">
+                            <span id="generateCalculationExercisesBtnText">Tạo Bài Tập Tính Toán</span>
+                            <div id="calculationExercisesSpinner" class="spinner hidden border-white border-l-white"></div>
+                        </button>
+                    </div>
+
                     <div id="quizContainer" class="flex-grow bg-gray-50 p-6 rounded-lg border border-gray-300 shadow-inner overflow-y-auto">
-                        <p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Mới" để AI tạo các câu hỏi cho bài học hiện tại.</p>
+                        <p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Lý Thuyết" hoặc "Tạo Bài Tập Tính Toán" để AI tạo các câu hỏi cho bài học hiện tại.</p>
                     </div>
                     <button id="submitQuizBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg shadow-md mt-4 w-full hidden">
                         Nộp Bài
@@ -588,9 +595,16 @@
             exercisesTab: document.getElementById('exercisesTab'),
             lessonView: document.getElementById('lessonView'),
             exercisesView: document.getElementById('exercisesView'),
-            generateExercisesBtn: document.getElementById('generateExercisesBtn'),
-            generateExercisesBtnText: document.getElementById('generateExercisesBtnText'),
-            exercisesSpinner: document.getElementById('exercisesSpinner'),
+            
+            // New: Specific exercise generation buttons
+            generateTheoreticalExercisesBtn: document.getElementById('generateTheoreticalExercisesBtn'),
+            generateTheoreticalExercisesBtnText: document.getElementById('generateTheoreticalExercisesBtnText'),
+            theoreticalExercisesSpinner: document.getElementById('theoreticalExercisesSpinner'),
+            
+            generateCalculationExercisesBtn: document.getElementById('generateCalculationExercisesBtn'),
+            generateCalculationExercisesBtnText: document.getElementById('generateCalculationExercisesBtnText'),
+            calculationExercisesSpinner: document.getElementById('calculationExercisesSpinner'),
+
             quizContainer: document.getElementById('quizContainer'),
             submitQuizBtn: document.getElementById('submitQuizBtn'),
             quizFeedbackArea: document.getElementById('quizFeedbackArea'),
@@ -865,7 +879,7 @@
         }
 
         // --- Tạo và hiển thị bài tập bằng AI ---
-        async function loadExercises(topic) {
+        async function loadExercises(topic, quizCategory) {
             if (!aiModel) {
                 return showMessage("Mô hình AI chưa sẵn sàng. Vui lòng kiểm tra cấu hình.", 5000);
             }
@@ -876,19 +890,33 @@
             elements.quizContainer.innerHTML = '';
             elements.quizFeedbackArea.classList.add('hidden'); // Ẩn phản hồi cũ
             elements.submitQuizBtn.classList.add('hidden'); // Ẩn nút nộp bài
-            elements.generateExercisesBtn.disabled = true; // Vô hiệu hóa nút tạo bài tập
-            elements.generateExercisesBtnText.textContent = 'Đang tạo...';
-            elements.exercisesSpinner.classList.remove('hidden');
+
+            // Disable all exercise generation buttons
+            elements.generateTheoreticalExercisesBtn.disabled = true;
+            elements.generateTheoreticalExercisesBtnText.textContent = 'Đang tạo...';
+            elements.theoreticalExercisesSpinner.classList.remove('hidden');
+
+            elements.generateCalculationExercisesBtn.disabled = true;
+            elements.generateCalculationExercisesBtnText.textContent = 'Đang tạo...';
+            elements.calculationExercisesSpinner.classList.remove('hidden');
 
             elements.aiLoadingIndicator.classList.remove('hidden');
-            elements.aiLoadingText.textContent = `AI đang tạo bài tập cho chủ đề: "${topic.content_title}"...`;
-            showMessage(`Đang tạo bài tập cho chủ đề: "${topic.content_title}"...`, 0);
+            elements.aiLoadingText.textContent = `AI đang tạo bài tập ${quizCategory === 'theoretical' ? 'lý thuyết' : 'tính toán'} cho chủ đề: "${topic.content_title}"...`;
+            showMessage(`Đang tạo bài tập ${quizCategory === 'theoretical' ? 'lý thuyết' : 'tính toán'} cho chủ đề: "${topic.content_title}"...`, 0);
 
             initializeAIChat(topic.id); // Khởi tạo/tái sử dụng phiên chat cho chủ đề này
 
-            // Modified prompt for Cấp 3 exercises
-            const userPrompt = `Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về chủ đề "${topic.content_title}" cho học sinh trung học tại Việt Nam.
-                Sử dụng ngẫu nhiên các loại câu hỏi sau nếu phù hợp với chủ đề: "multiple_choice", "fill_in_the_blank", "true_false", "matching", "equation_balancing". Đảm bảo các câu hỏi có độ khó nâng cao hơn, phức tạp hơn, phù hợp với chương trình THPT.
+            let promptDescription = "";
+            if (quizCategory === 'theoretical') {
+                promptDescription = "Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về **lý thuyết** của chủ đề";
+            } else if (quizCategory === 'calculation') {
+                promptDescription = "Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về **bài tập tính toán**, bao gồm các bài toán có lời văn, yêu cầu tính toán số liệu và đưa ra đáp án dưới dạng số hoặc lựa chọn số, của chủ đề";
+            } else {
+                promptDescription = "Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về chủ đề"; // Fallback for general
+            }
+
+            const userPrompt = `${promptDescription} "${topic.content_title}" cho học sinh trung học tại Việt Nam.
+                Sử dụng ngẫu nhiên các loại câu hỏi sau nếu phù hợp với chủ đề và loại bài tập yêu cầu: "multiple_choice", "fill_in_the_blank", "true_false", "matching", "equation_balancing". Đảm bảo các câu hỏi có độ khó nâng cao hơn, phức tạp hơn, phù hợp với chương trình THPT.
 
                 Cấu trúc JSON cho mỗi loại câu hỏi:
                 - Loại "multiple_choice":
@@ -1009,10 +1037,16 @@
                 elements.quizContainer.innerHTML = '<p class="text-red-500">Xin lỗi, đã xảy ra lỗi khi tạo bài tập. Vui lòng thử lại.</p>';
                 showMessage(`Lỗi: ${error.message}`, 7000);
             } finally {
+                // Re-enable all exercise generation buttons
+                elements.generateTheoreticalExercisesBtn.disabled = false;
+                elements.generateTheoreticalExercisesBtnText.textContent = 'Tạo Bài Tập Lý Thuyết';
+                elements.theoreticalExercisesSpinner.classList.add('hidden');
+
+                elements.generateCalculationExercisesBtn.disabled = false;
+                elements.generateCalculationExercisesBtnText.textContent = 'Tạo Bài Tập Tính Toán';
+                elements.calculationExercisesSpinner.classList.add('hidden');
+
                 elements.aiLoadingIndicator.classList.add('hidden');
-                elements.generateExercisesBtn.disabled = false;
-                elements.generateExercisesBtnText.textContent = 'Tạo Bài Tập Mới';
-                elements.exercisesSpinner.classList.add('hidden');
             }
         }
 
@@ -1327,9 +1361,11 @@
             elements.lessonTab.addEventListener('click', () => showView('lessonView'));
             elements.exercisesTab.addEventListener('click', () => {
                 showView('exercisesView');
-                // Optionally clear previous quiz feedback when switching back to exercises tab
+                // Clear quiz feedback area and hide submit button when switching to exercises tab
                 elements.quizFeedbackArea.classList.add('hidden');
-                elements.submitQuizBtn.classList.add('hidden'); // Hide submit button until new quiz generated
+                elements.submitQuizBtn.classList.add('hidden');
+                // Ensure the appropriate message is shown in quizContainer
+                elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Lý Thuyết" hoặc "Tạo Bài Tập Tính Toán" để AI tạo các câu hỏi cho bài học hiện tại.</p>';
             });
 
             // Event Listener for Generate Topic Button (new functionality)
@@ -1342,7 +1378,7 @@
                 // Clear previous states
                 elements.lessonContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Đang tạo nội dung bài học...</p>';
                 elements.aiExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về nội dung bài học hoặc các thuật ngữ sẽ hiển thị ở đây...</p>';
-                elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Mới" để AI tạo các câu hỏi cho bài học hiện tại.</p>';
+                elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Lý Thuyết" hoặc "Tạo Bài Tập Tính Toán" để AI tạo các câu hỏi cho bài học hiện tại.</p>'; // Updated message
                 elements.quizFeedbackArea.classList.add('hidden');
                 elements.submitQuizBtn.classList.add('hidden');
                 
@@ -1364,10 +1400,18 @@
                 showView('lessonView'); // Đảm bảo hiển thị tab bài học
             });
 
-            // Event Listener for Generate Exercises Button
-            elements.generateExercisesBtn.addEventListener('click', () => {
+            // New Event Listeners for specific exercise types
+            elements.generateTheoreticalExercisesBtn.addEventListener('click', () => {
                 if (currentActiveTopic) {
-                    loadExercises(currentActiveTopic);
+                    loadExercises(currentActiveTopic, 'theoretical');
+                } else {
+                    showMessage("Vui lòng tạo một bài học trước khi tạo bài tập.", 3000);
+                }
+            });
+
+            elements.generateCalculationExercisesBtn.addEventListener('click', () => {
+                if (currentActiveTopic) {
+                    loadExercises(currentActiveTopic, 'calculation');
                 } else {
                     showMessage("Vui lòng tạo một bài học trước khi tạo bài tập.", 3000);
                 }
