@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng dụng Học Hóa Học Cấp 3</title>
+    
+    <!-- Google Font: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* CSS tùy chỉnh để giao diện đẹp hơn và theo Material Design */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Màu nền nhẹ hơn, gần với Material background */
+            color: #424242; /* Màu văn bản đậm hơn để dễ đọc */
+        }
+        /* Hiệu ứng khi di chuột vào nút/mục danh sách - Material Elevation */
+        .interactive-item {
+            transition: all 0.2s cubic-bezier(.25,.8,.25,1); /* Material ease-out curve */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* Default subtle shadow */
+        }
+        .interactive-item:hover {
+            transform: translateY(-2px); /* Slight lift */
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); /* Stronger shadow on hover */
+        }
+        .interactive-item.active {
+            border-left: 5px solid #1976d2; /* Màu xanh đậm Material cho mục đang chọn */
+            background-color: #e3f2fd; /* Blue-50 Material */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.16), 0 2px 4px rgba(0,0,0,0.23);
+        }
+        
+        /* Biểu tượng tải - Material Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-left-color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Styles for AI-generated content area */
+        #lessonContentArea, #quizContainer {
+            /* Adjusted for more content visibility */
+            max-height: calc(100vh - 200px); /* Increased available height for content */
+            overflow-y: auto;
+            word-wrap: break-word; /* Ensure long words break */
+        }
+        
+        /* Ensure code blocks look good */
+        #lessonContentArea pre, #quizFeedbackArea pre {
+            background-color: #eceff1; /* Material Blue Grey 50 - slightly darker than grey 100 */
+            padding: 1.25rem; /* Increased padding */
+            border-radius: 0.5rem;
+            overflow-x: auto; /* Allow horizontal scroll for long lines */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace font for code */
+            font-size: 0.9em;
+            line-height: 1.5;
+            border-left: 5px solid #607d8b; /* Distinct left border for code blocks (Material Blue Grey 700) */
+        }
+
+        /* Basic styling for headings/paragraphs within AI content */
+        #lessonContentArea h2, #quizContainer h2, #quizFeedbackArea h2 {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            margin-top: 2rem; /* Increased margin for better separation */
+            margin-bottom: 1.25rem; /* Increased margin */
+            padding-bottom: 0.5rem; /* Added padding below heading */
+            border-bottom: 1px solid #e0e0e0; /* Subtle border below heading */
+            color: #212121; /* text-gray-900 */
+        }
+        #lessonContentArea h3, #quizContainer h3, #quizFeedbackArea h3 {
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600; /* font-semibold */
+            margin-top: 1.5rem; /* Increased margin */
+            margin-bottom: 1rem; /* Adjusted margin */
+            color: #424242; /* text-gray-800 */
+        }
+        #lessonContentArea p, #quizContainer p, #quizFeedbackArea p {
+            font-size: 1.05rem; /* Slightly larger font for readability */
+            margin-bottom: 1rem; /* Increased margin */
+            line-height: 1.6;
+            color: #424242; /* text-gray-700 */
+        }
+        #lessonContentArea ul, #lessonContentArea ol, #quizContainer ul, #quizContainer ol, #quizFeedbackArea ul, #quizFeedbackArea ol {
+            margin-left: 2rem; /* Increased indentation for lists */
+            margin-bottom: 1rem; /* Increased margin */
+            list-style-position: inside;
+        }
+        #lessonContentArea li, #quizContainer li, #quizFeedbackArea li {
+            font-size: 1.05rem; /* Slightly larger font for readability */
+            margin-bottom: 0.5rem; /* Increased margin */
+            color: #424242;
+        }
+        #lessonContentArea strong, #quizContainer strong, #quizFeedbackArea strong {
+            font-weight: 700;
+        }
+
+        /* Style for Quiz Questions */
+        .quiz-question {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #e0e0e0;
+            transition: border-color 0.3s ease; /* Transition for correct/incorrect state */
+        }
+        .quiz-question.correct {
+            border: 1px solid #4CAF50; /* Green border for correct */
+            background-color: #e8f5e9; /* Light green background */
+        }
+        .quiz-question.incorrect {
+            border: 1px solid #F44336; /* Red border for incorrect */
+            background-color: #ffebee; /* Light red background */
+        }
+
+        .quiz-question p.question-text {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151; /* text-gray-700 */
+        }
+        .quiz-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .quiz-option:hover {
+            background-color: #f5f5f5; /* Light hover effect */
+        }
+        .quiz-option input[type="radio"] {
+            margin-right: 0.75rem;
+            transform: scale(1.2); /* Slightly larger radio button */
+        }
+        .quiz-option label {
+            font-size: 1rem;
+            color: #4b5563; /* text-gray-600 */
+            cursor: pointer;
+        }
+
+        /* New styles for fill-in-the-blank input */
+        .fill-in-blank-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem; /* Space between words and inputs */
+            line-height: 1.6;
+        }
+
+        .fill-in-blank-input {
+            width: 100px; /* Default width for input */
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            font-size: 1rem;
+            color: #333;
+            background-color: #f8f8f8;
+            transition: all 0.2s ease;
+        }
+        .fill-in-blank-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+            background-color: #fff;
+        }
+        /* Ensure specific styles for true/false radio labels */
+        .true-false-option label {
+            font-weight: 500;
+        }
+
+        /* Styles for Matching questions */
+        .matching-pair {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        .matching-item {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #374151;
+            flex: 1; /* Allows item text to take available space */
+        }
+        .matching-dropdown {
+            flex: 2; /* Allows dropdown to be wider */
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            background-color: #f8f8f8;
+            font-size: 1rem;
+            color: #333;
+        }
+        .matching-dropdown:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+            background-color: #fff;
+        }
+
+        /* Styles for Equation Balancing questions */
+        .equation-balancing-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline; /* Align chemical symbols at baseline */
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace; /* Monospace for equations */
+            font-size: 1.2em; /* Slightly larger for clarity */
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        .equation-balancing-input {
+            width: 45px; /* Width for coefficient input */
+            padding: 0.25rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            text-align: center;
+            font-size: 1em; /* Inherit from container */
+            color: #333;
+            background-color: #f8f8f8;
+        }
+        .equation-balancing-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+            background-color: #fff;
+        }
+        .equation-part-text {
+            padding: 0 0.2em; /* Small padding around chemical symbols */
+        }
+
+        /* Specific styles for individual question feedback */
+        .quiz-question-feedback {
+            background-color: #e8f5e9; /* Light green for general feedback, adjust per correct/incorrect */
+            border-left: 4px solid #4CAF50;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.95rem;
+            color: #37474F; /* Blue Grey 800 */
+            line-height: 1.5;
+            margin-top: 1.25rem;
+        }
+        .quiz-question-feedback.incorrect-feedback {
+            background-color: #ffebee; /* Light red for incorrect feedback */
+            border-left-color: #F44336;
+        }
+        .quiz-question-feedback h4 {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #212121;
+        }
+
+        /* Active tab styling */
+        .active-tab {
+            border-color: #4f46e5; /* indigo-600 */
+            color: #4f46e5; /* indigo-600 */
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000; /* Higher than other elements */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            width: 90%; /* Take up 90% of screen width */
+            height: 90%; /* Take up 90% of screen height */
+            max-width: 1200px; /* Limit max width for very large screens */
+            display: flex; /* Use flex to make content scrollable */
+            flex-direction: column;
+            transform: translateY(20px); /* Slight animation on open */
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.75rem; /* text-3xl like main title, slightly smaller to fit */
+            font-weight: 700;
+            color: #212121;
+            margin: 0; /* Override default h3 margins */
+            padding: 0;
+        }
+
+        .modal-body {
+            flex-grow: 1; /* Allow content to fill available space */
+            overflow-y: auto; /* Enable scrolling for modal content */
+            padding-right: 1rem; /* Space for scrollbar within body */
+        }
+
+        /* Ensure styling inside modal is consistent */
+        .modal-body h2 {
+            font-size: 1.875rem; /* text-3xl, same as main content h2 */
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            color: #212121;
+        }
+        .modal-body h3 {
+            font-size: 1.5rem; /* text-2xl, same as main content h3 */
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            color: #424242;
+        }
+        .modal-body p {
+            font-size: 1.05rem; /* Same as main content paragraphs */
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: #424242;
+        }
+        .modal-body ul, .modal-body ol {
+            margin-left: 2rem; /* Same as main content lists */
+            margin-bottom: 1rem;
+            list-style-position: inside;
+        }
+        .modal-body li {
+            font-size: 1.05rem; /* Same as main content list items */
+            margin-bottom: 0.5rem;
+            color: #424242;
+        }
+        .modal-body pre {
+            background-color: #eceff1;
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+            font-size: 0.95em; /* Slightly larger font for code in modal */
+            line-height: 1.5;
+            border-left: 5px solid #607d8b;
+        }
+        .modal-body .fill-in-blank-input {
+            width: 120px; /* Slightly wider in modal */
+            padding: 0.35rem 0.65rem;
+        }
+        .modal-body .matching-dropdown {
+            width: 150px; /* Slightly wider in modal */
+        }
+        .modal-body .equation-balancing-input {
+            width: 50px; /* Slightly wider in modal */
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Auth Container - Hidden by default, shown when logged out -->
+    <div id="authContainer" class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-200">
+            <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Chào mừng bạn đến với Ứng dụng Học Hóa Học Cấp 3!</h2>
+            <p class="text-center text-gray-600 mb-6">Vui lòng đăng nhập hoặc đăng ký để tiếp tục.</p>
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+                    <input type="email" id="email" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="your@example.com">
+                </div>
+                <div>
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Mật khẩu:</label>
+                    <input type="password" id="password" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="••••••••">
+                </div>
+                <button type="submit" id="signInBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg shadow-md w-full transition duration-200">Đăng nhập</button>
+                <button type="button" id="signUpBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-5 rounded-lg shadow-md w-full transition duration-200">Đăng ký</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Container - Hidden by default, shown when logged in -->
+    <div id="appContainer" class="min-h-screen flex flex-col hidden">
+        <!-- Phần Header - Material App Bar -->
+        <header class="bg-indigo-700 text-white p-4 shadow-md flex justify-between items-center z-40">
+            <h1 class="text-3xl font-bold">Ứng dụng Học Hóa Học Cấp 3</h1>
+            <div class="flex items-center gap-4">
+                <span id="currentUserEmail" class="text-lg font-medium hidden lg:block"></span>
+                <button id="signOutBtn" class="bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition duration-200">Đăng xuất</button>
+            </div>
+        </header>
+
+        <!-- Nội dung chính của ứng dụng -->
+        <main id="mainAppContent" class="flex-grow container mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Cột trái: Nhập chủ đề (LG: 1/4 màn hình) -->
+            <section class="bg-white p-6 rounded-lg shadow-md col-span-1 lg:col-span-4 flex flex-col border border-gray-200">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Nhập Chủ Đề Hóa Học Cấp 3</h2>
+                
+                <div class="mb-4">
+                    <label for="topicInput" class="block text-gray-700 text-sm font-bold mb-2">Tiêu đề bài học:</label>
+                    <input type="text" id="topicInput" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-400" placeholder="Ví dụ: Phản ứng Oxi hóa-khử, Hidrocacbon">
+                </div>
+                <button id="generateTopicBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg shadow-md w-full flex items-center justify-center gap-2 transition duration-200">
+                    <span id="generateTopicBtnText">Tạo Bài Học Mới</span>
+                    <div id="generateTopicSpinner" class="spinner hidden border-white border-l-white"></div>
+                </button>
+            </section>
+
+            <!-- Cột phải: Nội dung bài học và tương tác AI (LG: 3/4 màn hình) -->
+            <section class="bg-white p-8 rounded-xl shadow-xl col-span-1 lg:col-span-8 flex flex-col border border-gray-200">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800" id="mainContentTitle">Nội Dung</h2>
+                
+                <!-- Tabs for Lesson/Exercises and Expand Button -->
+                <div class="flex items-center border-b border-gray-200 mb-6">
+                    <button id="lessonTab" class="py-2 px-4 text-lg font-medium text-gray-700 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600 active-tab">Bài học</button>
+                    <button id="exercisesTab" class="py-2 px-4 text-lg font-medium text-gray-700 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600">Bài tập</button>
+                    <button id="expandContentBtn" class="ml-auto py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg shadow-sm flex items-center gap-2 transition duration-200 text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15.75M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 16.5v-4.5m0 4.5h-4.5m4.5 0L15 15.75" />
+                        </svg>
+                        Mở rộng
+                    </button>
+                </div>
+
+                <!-- Content for Lesson -->
+                <div id="lessonView" class="flex-grow flex flex-col">
+                    <!-- Khu vực hiển thị nội dung bài học do AI tạo ra -->
+                    <div id="lessonContentArea" class="flex-grow bg-gray-50 p-6 rounded-lg border border-gray-300 shadow-inner text-gray-800 leading-relaxed overflow-y-auto">
+                        <p class="text-gray-500 text-center text-lg">Nhập tiêu đề bài học Hóa học Cấp 3 bạn muốn tìm hiểu vào ô bên trái và nhấn "Tạo Bài Học Mới"!</p>
+                    </div>
+
+                    <!-- Khu vực hiển thị giải thích từ AI -->
+                    <div class="mt-6 mb-4 bg-white p-6 rounded-xl shadow-lg border border-gray-200 border-l-4 border-purple-600">
+                        <label for="aiExplanationBox" class="block text-gray-700 text-base font-bold mb-2">Giải thích từ AI (nếu có):</label>
+                        <div id="aiExplanationBox" class="w-full min-h-[50px] p-4 bg-purple-50 border border-purple-200 rounded-lg overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                            <p class="text-gray-500">Giải thích chi tiết về nội dung bài học hoặc các thuật ngữ sẽ hiển thị ở đây...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content for Exercises -->
+                <div id="exercisesView" class="hidden flex-grow flex-col">
+                    <button id="generateExercisesBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-5 rounded-lg shadow-md mb-4 w-full flex items-center justify-center gap-2">
+                        <span id="generateExercisesBtnText">Tạo Bài Tập Mới</span>
+                        <div id="exercisesSpinner" class="spinner hidden border-white border-l-white"></div>
+                    </button>
+                    <div id="quizContainer" class="flex-grow bg-gray-50 p-6 rounded-lg border border-gray-300 shadow-inner overflow-y-auto">
+                        <p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Mới" để AI tạo các câu hỏi cho bài học hiện tại.</p>
+                    </div>
+                    <button id="submitQuizBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-5 rounded-lg shadow-md mt-4 w-full hidden">
+                        Nộp Bài
+                    </button>
+                    <!-- Area for AI Feedback on Quiz -->
+                    <div id="quizFeedbackArea" class="mt-6 mb-4 bg-white p-6 rounded-xl shadow-lg border border-gray-200 border-l-4 border-blue-600 hidden">
+                        <label class="block text-gray-700 text-base font-bold mb-2">Phản hồi từ AI:</label>
+                        <div id="quizFeedbackContent" class="w-full min-h-[50px] p-4 bg-blue-50 border border-blue-200 rounded-lg overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                            <p class="text-gray-500">Phản hồi của AI về kết quả bài làm của bạn sẽ hiển thị ở đây.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner và thông báo chung cho AI -->
+                <div id="aiLoadingIndicator" class="hidden flex items-center justify-center gap-3 mt-4 text-blue-600 font-semibold">
+                    <div class="spinner border-blue-600 border-l-blue-600"></div>
+                    <span id="aiLoadingText">AI đang xử lý, vui lòng đợi...</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Hộp thông báo tùy chỉnh - Material Snackbar -->
+    <div id="messageBox" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl hidden z-50 transition-opacity duration-300 opacity-0">
+        <span id="messageContent"></span>
+    </div>
+
+    <!-- Modal Overlay (added) -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle" class="text-2xl font-bold text-gray-800"></h3>
+                <button id="modalCloseBtn" class="p-2 rounded-full hover:bg-gray-100 transition duration-200 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-7 h-7 text-gray-600 hover:text-gray-800">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="modalContentBody" class="modal-body text-gray-800">
+                <!-- Content will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK và script tùy chỉnh -->
+    <script type="module">
+        // Import các module cần thiết từ Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js"; 
+        
+        // Firebase AI SDK
+        import { getAI, getGenerativeModel, GoogleAIBackend } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-ai.js";
+
+        // --- Cấu hình Firebase ---
+        // LƯU Ý QUAN TRỌNG: Thay thế các giá trị dưới đây bằng cấu hình Firebase của chính bạn.
+        const firebaseConfig = {
+            apiKey: "AIzaSyASdYs5gM54q9h0uhe4915szZs8UfJPFVs",
+            authDomain: "hochoa-11c2c.firebaseapp.com",
+            projectId: "hochoa-11c2c",
+            storageBucket: "hochoa-11c2c.firebasestorage.app",
+            messagingSenderId: "901169958982",
+            appId: "1:901169958982:web:77fb7c38d895d3b15f7a47"
+        };
+
+
+        // --- Khởi tạo Firebase ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app); 
+
+        let aiModel;
+        let chat = null; // Biến để lưu trữ phiên trò chuyện với AI
+        let currentChatTopicId = null; // Để quản lý ngữ cảnh chat theo chủ đề
+
+        // Lưu trữ đáp án đúng của bài tập đang hiển thị
+        let quizCorrectAnswers = {}; 
+        let currentQuizQuestions = []; // Lưu trữ toàn bộ câu hỏi của bài tập hiện tại
+
+        try {
+            const ai = getAI(app, { backend: new GoogleAIBackend() });
+            aiModel = getGenerativeModel(ai, { model: "gemini-2.5-flash" }); // Sử dụng mô hình flash để nhanh hơn
+            console.log("Generative Model initialized successfully via Firebase AI SDK.");
+        } catch (e) {
+            console.error("Error initializing AI Model:", e);
+            showMessage("Lỗi khởi tạo AI Model. Kiểm tra Console và cấu hình Firebase.", 7000);
+        }
+
+        // --- Tham chiếu DOM ---
+        const elements = {
+            // Auth elements
+            authContainer: document.getElementById('authContainer'),
+            appContainer: document.getElementById('appContainer'),
+            emailInput: document.getElementById('email'),
+            passwordInput: document.getElementById('password'),
+            signInBtn: document.getElementById('signInBtn'),
+            signUpBtn: document.getElementById('signUpBtn'),
+            signOutBtn: document.getElementById('signOutBtn'),
+            currentUserEmail: document.getElementById('currentUserEmail'),
+
+            // New topic input elements
+            topicInput: document.getElementById('topicInput'),
+            generateTopicBtn: document.getElementById('generateTopicBtn'),
+            generateTopicBtnText: document.getElementById('generateTopicBtnText'),
+            generateTopicSpinner: document.getElementById('generateTopicSpinner'),
+
+            lessonContentArea: document.getElementById('lessonContentArea'),
+            aiExplanationBox: document.getElementById('aiExplanationBox'),
+            aiLoadingIndicator: document.getElementById('aiLoadingIndicator'),
+            aiLoadingText: document.getElementById('aiLoadingText'),
+            messageBox: document.getElementById('messageBox'),
+            messageContent: document.getElementById('messageContent'),
+
+            lessonTab: document.getElementById('lessonTab'),
+            exercisesTab: document.getElementById('exercisesTab'),
+            lessonView: document.getElementById('lessonView'),
+            exercisesView: document.getElementById('exercisesView'),
+            generateExercisesBtn: document.getElementById('generateExercisesBtn'),
+            generateExercisesBtnText: document.getElementById('generateExercisesBtnText'),
+            exercisesSpinner: document.getElementById('exercisesSpinner'),
+            quizContainer: document.getElementById('quizContainer'),
+            submitQuizBtn: document.getElementById('submitQuizBtn'),
+            quizFeedbackArea: document.getElementById('quizFeedbackArea'),
+            quizFeedbackContent: document.getElementById('quizFeedbackContent'),
+            mainContentTitle: document.getElementById('mainContentTitle'),
+
+            // New Modal elements
+            expandContentBtn: document.getElementById('expandContentBtn'),
+            modalOverlay: document.getElementById('modalOverlay'),
+            modalContentBody: document.getElementById('modalContentBody'),
+            modalCloseBtn: document.getElementById('modalCloseBtn'),
+            modalTitle: document.getElementById('modalTitle')
+        };
+
+        // Biến để lưu trữ chủ đề đang hoạt động (do người dùng nhập)
+        let currentActiveTopic = null; // Sẽ là một object { id, title, content_title, target_content }
+
+        // --- Hàm tiện ích ---
+        function showMessage(message, duration = 3000) {
+            elements.messageContent.textContent = message;
+            elements.messageBox.classList.remove('hidden', 'opacity-0');
+            elements.messageBox.classList.add('opacity-100');
+            clearTimeout(elements.messageBox.timer); 
+            elements.messageBox.timer = setTimeout(() => {
+                elements.messageBox.classList.remove('opacity-100');
+                elements.messageBox.classList.add('opacity-0');
+                setTimeout(() => elements.messageBox.classList.add('hidden'), 300);
+            }, duration);
+        }
+
+        // Hàm xử lý lỗi Firebase Auth để hiển thị thông báo thân thiện hơn
+        function handleAuthError(error) {
+            let errorMessage = "Đã xảy ra lỗi. Vui lòng thử lại.";
+            switch (error.code) {
+                case 'auth/invalid-email':
+                    errorMessage = "Địa chỉ email không hợp lệ.";
+                    break;
+                case 'auth/user-disabled':
+                    errorMessage = "Tài khoản của bạn đã bị vô hiệu hóa.";
+                    break;
+                case 'auth/user-not-found':
+                    errorMessage = "Không tìm thấy tài khoản với email này.";
+                    break;
+                case 'auth/wrong-password':
+                    errorMessage = "Mật khẩu không đúng.";
+                    break;
+                case 'auth/email-already-in-use':
+                    errorMessage = "Địa chỉ email này đã được sử dụng.";
+                    break;
+                case 'auth/weak-password':
+                    errorMessage = "Mật khẩu quá yếu (cần ít nhất 6 ký tự).";
+                    break;
+                case 'auth/operation-not-allowed':
+                    errorMessage = "Tính năng đăng nhập/đăng ký bằng Email/Password chưa được kích hoạt trong Firebase Console.";
+                    break;
+                default:
+                    errorMessage = `Lỗi xác thực: ${error.message}`;
+            }
+            showMessage(errorMessage, 5000);
+            console.error("Firebase Auth Error:", error);
+        }
+
+        // --- Hàm quản lý hiển thị các view (Bài học/Bài tập) ---
+        function showView(viewId) {
+            elements.lessonView.classList.add('hidden');
+            elements.exercisesView.classList.add('hidden');
+            elements.lessonTab.classList.remove('active-tab');
+            elements.exercisesTab.classList.remove('active-tab');
+
+            document.getElementById(viewId).classList.remove('hidden');
+            if (viewId === 'lessonView') {
+                elements.lessonTab.classList.add('active-tab');
+            } else if (viewId === 'exercisesView') {
+                elements.exercisesTab.classList.add('active-tab');
+            }
+        }
+
+        // --- Khởi tạo phiên trò chuyện AI nếu cần ---
+        function initializeAIChat(topicId) {
+            // Chỉ tạo chat mới nếu chưa có hoặc nếu chủ đề hiện tại khác với chủ đề của chat session
+            if (chat === null || currentChatTopicId !== topicId) {
+                chat = aiModel.startChat({
+                    history: [
+                        {
+                            role: "user",
+                            parts: [{ text: "Bạn là một trợ lý giáo dục hóa học chuyên sâu, tập trung vào kiến thức cấp 3 (THPT) tại Việt Nam. Bạn sẽ tạo nội dung bài học và bài tập, cũng như giải thích các khái niệm. Luôn ưu tiên sự chính xác và dễ hiểu, phù hợp với chương trình Hóa học THPT. Khi được yêu cầu tạo nội dung bài học, bạn sẽ cung cấp nội dung HTML, sau đó là dòng '---CODE---', rồi đến giải thích. Khi được yêu cầu tạo bài tập, bạn sẽ cung cấp một đối tượng JSON chứa các câu hỏi trắc nghiệm, đáp án và giải thích. Khi được yêu cầu phản hồi về bài làm, bạn sẽ phân tích các câu trả lời và đưa ra gợi ý, giải thích cụ thể cho từng câu sai, và lời khen cho câu đúng. Bắt đầu trò chuyện bằng cách cho tôi biết yêu cầu của bạn." }],
+                        },
+                        {
+                            role: "model",
+                            parts: [{ text: "Đã hiểu. Tôi sẵn sàng tạo nội dung bài học hóa học cấp 3 (THPT) theo yêu cầu của bạn." }],
+                        }
+                    ]
+                });
+                currentChatTopicId = topicId;
+                console.log(`AI Chat session initialized/re-initialized for topic: ${topicId}`);
+            }
+        }
+
+        // --- Helper function to render different quiz question types ---
+        function renderQuestionHtml(q, index) {
+            let questionHtml = '';
+            
+            if (q.type === 'multiple_choice') {
+                questionHtml += `
+                    <div class="quiz-question" data-question-id="${q.id}" data-question-type="${q.type}">
+                        <p class="question-text">${index + 1}. ${q.question_text}</p>
+                        <div class="options-group mt-4">
+                `;
+                q.options.forEach((option, optIndex) => {
+                    const optionId = `q${q.id}-opt${optIndex}`;
+                    questionHtml += `
+                            <div class="quiz-option">
+                                <input type="radio" id="${optionId}" name="question-${q.id}" value="${option.trim()}" class="mr-2">
+                                <label for="${optionId}">${option.trim()}</label>
+                            </div>
+                    `;
+                });
+                quizCorrectAnswers[q.id] = q.correct_answer.trim(); // Store correct answer for MC
+                questionHtml += `
+                        </div>
+                        <div class="quiz-question-feedback mt-4 hidden"></div>
+                    </div>
+                `;
+            } else if (q.type === 'fill_in_the_blank') {
+                let formattedQuestionText = q.question_text;
+                const blankMap = q.blanks_info.reduce((acc, blank) => {
+                    acc[blank.id] = blank.correct_answer.trim();
+                    return acc;
+                }, {});
+
+                formattedQuestionText = formattedQuestionText.replace(/\[BLANK(\d+)\]/g, (match, p1) => {
+                    const blankId = `BLANK${p1}`;
+                    return `<input type="text" data-question-id="${q.id}" data-blank-id="${blankId}" class="fill-in-blank-input" placeholder="Điền vào đây">`;
+                });
+
+                questionHtml += `
+                    <div class="quiz-question" data-question-id="${q.id}" data-question-type="${q.type}">
+                        <div class="question-text fill-in-blank-container">${index + 1}. ${formattedQuestionText}</div>
+                        <div class="quiz-question-feedback mt-4 hidden"></div>
+                    </div>
+                `; 
+                
+                quizCorrectAnswers[q.id] = blankMap;
+            } else if (q.type === 'true_false') {
+                questionHtml += `
+                    <div class="quiz-question" data-question-id="${q.id}" data-question-type="${q.type}">
+                        <p class="question-text">${index + 1}. ${q.question_text}</p>
+                        <div class="options-group mt-4">
+                            <div class="quiz-option true-false-option">
+                                <input type="radio" id="q${q.id}-true" name="question-${q.id}" value="true" class="mr-2">
+                                <label for="q${q.id}-true">Đúng</label>
+                            </div>
+                            <div class="quiz-option true-false-option">
+                                <input type="radio" id="q${q.id}-false" name="question-${q.id}" value="false" class="mr-2">
+                                <label for="q${q.id}-false">Sai</label>
+                            </div>
+                        </div>
+                        <div class="quiz-question-feedback mt-4 hidden"></div>
+                    </div>
+                `;
+                quizCorrectAnswers[q.id] = String(q.correct_answer).toLowerCase();
+            } else if (q.type === 'matching') {
+                questionHtml += `
+                    <div class="quiz-question" data-question-id="${q.id}" data-question-type="${q.type}">
+                        <p class="question-text">${index + 1}. ${q.question_text}</p>
+                        <div class="matching-container mt-4">
+                `;
+                // Shuffle right_column options for dropdowns
+                const shuffledMatches = [...q.matches].sort(() => Math.random() - 0.5);
+
+                q.items.forEach(item => {
+                    questionHtml += `
+                            <div class="matching-pair">
+                                <span class="matching-item" data-item-id="${item.id}">${item.text}</span>
+                                <select class="matching-dropdown" data-question-id="${q.id}" data-item-id="${item.id}">
+                                    <option value="">-- Chọn --</option>
+                    `;
+                    shuffledMatches.forEach(match => {
+                        questionHtml += `<option value="${match.id}">${match.text}</option>`;
+                    });
+                    questionHtml += `
+                                </select>
+                            </div>
+                    `;
+                });
+                quizCorrectAnswers[q.id] = q.correct_pairs; // Store array of correct pairs
+                questionHtml += `
+                        </div>
+                        <div class="quiz-question-feedback mt-4 hidden"></div>
+                    </div>
+                `;
+            } else if (q.type === 'equation_balancing') {
+                questionHtml += `
+                    <div class="quiz-question" data-question-id="${q.id}" data-question-type="${q.type}">
+                        <p class="question-text">${index + 1}. ${q.question_text}</p>
+                        <div class="equation-balancing-container">
+                `;
+                q.equation_parts.forEach((part, partIndex) => {
+                    if (part === '_ ') {
+                        questionHtml += `<input type="number" min="0" data-question-id="${q.id}" data-coefficient-index="${partIndex}" class="equation-balancing-input">`;
+                    } else {
+                        questionHtml += `<span class="equation-part-text">${part}</span>`;
+                    }
+                });
+                quizCorrectAnswers[q.id] = q.correct_coefficients; // Store array of correct coefficients
+                questionHtml += `
+                        </div>
+                        <div class="quiz-question-feedback mt-4 hidden"></div>
+                    </div>
+                `;
+            }
+            return questionHtml;
+        }
+
+        // --- Tải nội dung bài học bằng AI ---
+        async function loadLessonContent(topic) {
+            if (!aiModel) {
+                return showMessage("Mô hình AI chưa sẵn sàng. Vui lòng kiểm tra cấu hình.", 5000);
+            }
+
+            elements.lessonContentArea.innerHTML = ''; 
+            elements.aiExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về nội dung bài học hoặc các thuật ngữ sẽ hiển thị ở đây...</p>';
+            elements.aiLoadingIndicator.classList.remove('hidden'); 
+            elements.aiLoadingText.textContent = `AI đang tạo nội dung cho chủ đề: "${topic.content_title}"...`;
+            showMessage(`Đang tạo nội dung cho chủ đề: "${topic.content_title}"...`, 0); 
+
+            initializeAIChat(topic.id); // Khởi tạo/tái sử dụng phiên chat cho chủ đề này
+
+            try {
+                // Modified prompt for Cấp 3 content
+                const userPrompt = `Hãy tạo nội dung bài học hóa học cấp 3 (THPT) về "${topic.content_title}" cho học sinh trung học tại Việt Nam.
+                Bài học cần bao gồm: ${topic.target_content}
+                Trình bày nội dung dưới dạng HTML sạch sẽ, dễ đọc, với các khái niệm chuyên sâu hơn và ví dụ phức tạp hơn phù hợp với trình độ THPT.
+                Sử dụng các thẻ như:
+                -   \`<h2>\`, \`<h3>\` cho tiêu đề phụ.
+                -   \`<p>\` cho đoạn văn.
+                -   \`<ul>\`/\`<ol>\` cho danh sách.
+                -   \`<strong>\` cho từ khóa quan trọng.
+                -   \`<code>\` hoặc \`<pre>\` cho công thức, phương trình, hoặc ví dụ mã/kí hiệu.
+                
+                Đừng bao gồm thẻ \`<html>\`, \`<head>\`, \`<body>\`, chỉ trả về phần nội dung HTML.
+                Sau phần nội dung HTML, thêm một dòng phân cách "---CODE---" và sau đó là một đoạn giải thích ngắn gọn bằng tiếng Việt về tổng quan bài học hoặc các điểm nổi bật.`
+                
+                const result = await chat.sendMessage(userPrompt);
+                const fullResponseText = result.response.text();
+
+                const separator = '---CODE---';
+                let lessonHtml = fullResponseText;
+                let explanation = "AI không cung cấp giải thích thêm.";
+
+                if (fullResponseText.includes(separator)) {
+                    const parts = fullResponseText.split(separator);
+                    lessonHtml = parts[0].trim();
+                    explanation = parts.slice(1).join(separator).trim();
+                }
+                
+                elements.lessonContentArea.innerHTML = lessonHtml;
+                elements.aiExplanationBox.innerHTML = explanation.replace(/\n/g, '<br>');
+                showMessage("Đã tải nội dung bài học thành công!", 3000);
+
+            } catch (error) {
+                console.error("Lỗi khi tải nội dung bài học từ AI:", error);
+                elements.lessonContentArea.innerHTML = '<p class="text-red-500">Xin lỗi, đã xảy ra lỗi khi tải nội dung bài học. Vui lòng thử lại.</p>';
+                elements.aiExplanationBox.innerHTML = '<p class="text-red-500">Lỗi: ' + error.message + '</p>';
+                showMessage(`Lỗi: ${error.message}`, 7000);
+            } finally {
+                elements.aiLoadingIndicator.classList.add('hidden');
+                elements.generateTopicBtn.disabled = false; // Enable generate topic button
+                elements.generateTopicBtnText.textContent = 'Tạo Bài Học Mới';
+                elements.generateTopicSpinner.classList.add('hidden');
+            }
+        }
+
+        // --- Tạo và hiển thị bài tập bằng AI ---
+        async function loadExercises(topic) {
+            if (!aiModel) {
+                return showMessage("Mô hình AI chưa sẵn sàng. Vui lòng kiểm tra cấu hình.", 5000);
+            }
+            if (!topic) {
+                return showMessage("Vui lòng nhập tiêu đề bài học để tạo bài tập.", 3000);
+            }
+
+            elements.quizContainer.innerHTML = '';
+            elements.quizFeedbackArea.classList.add('hidden'); // Ẩn phản hồi cũ
+            elements.submitQuizBtn.classList.add('hidden'); // Ẩn nút nộp bài
+            elements.generateExercisesBtn.disabled = true; // Vô hiệu hóa nút tạo bài tập
+            elements.generateExercisesBtnText.textContent = 'Đang tạo...';
+            elements.exercisesSpinner.classList.remove('hidden');
+
+            elements.aiLoadingIndicator.classList.remove('hidden');
+            elements.aiLoadingText.textContent = `AI đang tạo bài tập cho chủ đề: "${topic.content_title}"...`;
+            showMessage(`Đang tạo bài tập cho chủ đề: "${topic.content_title}"...`, 0);
+
+            initializeAIChat(topic.id); // Khởi tạo/tái sử dụng phiên chat cho chủ đề này
+
+            // Modified prompt for Cấp 3 exercises
+            const userPrompt = `Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về chủ đề "${topic.content_title}" cho học sinh trung học tại Việt Nam.
+                Sử dụng ngẫu nhiên các loại câu hỏi sau nếu phù hợp với chủ đề: "multiple_choice", "fill_in_the_blank", "true_false", "matching", "equation_balancing". Đảm bảo các câu hỏi có độ khó nâng cao hơn, phức tạp hơn, phù hợp với chương trình THPT.
+
+                Cấu trúc JSON cho mỗi loại câu hỏi:
+                - Loại "multiple_choice":
+                  \`\`\`json
+                  {
+                    "id": 1,
+                    "type": "multiple_choice",
+                    "question_text": "...",
+                    "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+                    "correct_answer": "...",
+                    "explanation": "..."
+                  }
+                  \`\`\`
+                - Loại "fill_in_the_blank":
+                  \`\`\`json
+                  {
+                    "id": 2,
+                    "type": "fill_in_the_blank",
+                    "question_text": "Nước có công thức hóa học là [BLANK1].",
+                    "blanks_info": [
+                      { "id": "BLANK1", "correct_answer": "H2O", "hint": "..." }
+                    ],
+                    "explanation": "..."
+                  }
+                  \`\`\`
+                - Loại "true_false":
+                  \`\`\`json
+                  {
+                    "id": 3,
+                    "type": "true_false",
+                    "question_text": "Nước cất là một chất tinh khiết.",
+                    "correct_answer": true, 
+                    "explanation": "..."
+                  }
+                  \`\`\`
+                - Loại "matching":
+                  \`\`\`json
+                  {
+                    "id": 4,
+                    "type": "matching",
+                    "question_text": "Nối các khái niệm với định nghĩa:",
+                    "items": [
+                      {"id": "item1", "text": "Khái niệm A"},
+                      {"id": "item2", "text": "Khái niệm B"}
+                    ],
+                    "matches": [
+                      {"id": "match1", "text": "Định nghĩa X"},
+                      {"id": "match2", "text": "Định nghĩa Y"}
+                    ],
+                    "correct_pairs": [
+                      {"item_id": "item1", "match_id": "match1"},
+                      {"item_id": "item2", "match_id": "match2"}
+                    ],
+                    "explanation": "..."
+                  }
+                  \`\`\`
+                - Loại "equation_balancing":
+                  \`\`\`json
+                  {
+                    "id": 5,
+                    "type": "equation_balancing",
+                    "question_text": "Cân bằng phương trình:",
+                    "equation_parts": ["_ ", "Fe + ", "_ ", "O2 -> ", "_ ", "Fe2O3"],
+                    "correct_coefficients": [4, 3, 2],
+                    "explanation": "..."
+                  }
+                  \`\`\`
+                
+                Trả về một đối tượng JSON duy nhất có cấu trúc:
+                \`\`\`json
+                {
+                  "quiz_title": "Tên bài kiểm tra",
+                  "questions": [
+                    // Các câu hỏi ở đây
+                  ]
+                }
+                \`\`\`
+                Đảm bảo nội dung là tiếng Việt và không có bất kỳ văn bản nào ngoài khối JSON.
+            `;
+                
+            try {
+                const result = await chat.sendMessage(userPrompt);
+                const fullResponseText = result.response.text();
+                
+                let quizData = null;
+                try {
+                    const jsonMatch = fullResponseText.match(/```json\n([\s\S]*?)\n```/);
+                    if (jsonMatch && jsonMatch[1]) {
+                        quizData = JSON.parse(jsonMatch[1]);
+                    } else {
+                        quizData = JSON.parse(fullResponseText);
+                    }
+                } catch (parseError) {
+                    console.error("Lỗi parse JSON từ AI:", parseError);
+                    elements.quizContainer.innerHTML = '<p class="text-red-500">Lỗi: AI không trả về định dạng JSON hợp lệ. Vui lòng thử lại.</p>';
+                    return;
+                }
+
+                if (!quizData || !quizData.questions || quizData.questions.length === 0) {
+                    elements.quizContainer.innerHTML = '<p class="text-red-500">AI không thể tạo bài tập. Vui lòng thử lại hoặc thay đổi yêu cầu.</p>';
+                    return;
+                }
+
+                quizCorrectAnswers = {}; // Reset correct answers for new quiz
+                currentQuizQuestions = quizData.questions; // Store all questions including their types
+
+                let quizHtml = `<h2 class="text-2xl font-bold mb-4">${quizData.quiz_title || 'Bài tập Hóa học'}</h2>`;
+                currentQuizQuestions.forEach((q, index) => {
+                    quizHtml += renderQuestionHtml(q, index);
+                });
+
+                elements.quizContainer.innerHTML = quizHtml;
+                elements.submitQuizBtn.classList.remove('hidden'); // Hiển thị nút nộp bài
+                showMessage("Đã tạo bài tập thành công!", 3000);
+
+            } catch (error) {
+                console.error("Lỗi khi tải bài tập từ AI:", error);
+                elements.quizContainer.innerHTML = '<p class="text-red-500">Xin lỗi, đã xảy ra lỗi khi tạo bài tập. Vui lòng thử lại.</p>';
+                showMessage(`Lỗi: ${error.message}`, 7000);
+            } finally {
+                elements.aiLoadingIndicator.classList.add('hidden');
+                elements.generateExercisesBtn.disabled = false;
+                elements.generateExercisesBtnText.textContent = 'Tạo Bài Tập Mới';
+                elements.exercisesSpinner.classList.add('hidden');
+            }
+        }
+
+        // --- Nộp bài và nhận phản hồi từ AI ---
+        async function submitQuiz() {
+            if (!chat) {
+                return showMessage("Phiên AI đã hết hạn. Vui lòng tạo lại bài tập.", 5000);
+            }
+            if (!currentActiveTopic) {
+                return showMessage("Vui lòng tạo một bài học trước khi nộp bài.", 3000);
+            }
+
+            elements.submitQuizBtn.disabled = true;
+            elements.aiLoadingIndicator.classList.remove('hidden');
+            elements.aiLoadingText.textContent = 'AI đang chấm điểm và đưa ra phản hồi...';
+            showMessage('Đang nộp bài và nhận phản hồi...', 0);
+
+            const userAnswers = {};
+            currentQuizQuestions.forEach(q => {
+                const qElement = elements.quizContainer.querySelector(`.quiz-question[data-question-id="${q.id}"]`);
+                if (!qElement) return;
+
+                let userAnswer = null; // Default to null (unanswered)
+                if (q.type === 'multiple_choice' || q.type === 'true_false') {
+                    const selectedOption = qElement.querySelector(`input[name="question-${q.id}"]:checked`);
+                    userAnswer = selectedOption ? selectedOption.value.trim() : null;
+                } else if (q.type === 'fill_in_the_blank') {
+                    const blanks = {};
+                    let allBlanksFilled = true;
+                    qElement.querySelectorAll(`input.fill-in-blank-input[data-question-id="${q.id}"]`).forEach(input => {
+                        const blankId = input.dataset.blankId;
+                        blanks[blankId] = input.value.trim();
+                        if (!input.value.trim()) {
+                            allBlanksFilled = false;
+                        }
+                    });
+                    userAnswer = allBlanksFilled ? blanks : null; // If any blank is empty, mark as unanswered
+                } else if (q.type === 'matching') {
+                    const selectedPairs = [];
+                    let allMatched = true;
+                    qElement.querySelectorAll(`.matching-dropdown[data-question-id="${q.id}"]`).forEach(select => {
+                        const itemId = select.dataset.itemId;
+                        const selectedMatchId = select.value;
+                        if (selectedMatchId) {
+                            selectedPairs.push({ item_id: itemId, user_match_id: selectedMatchId });
+                        } else {
+                            allMatched = false;
+                        }
+                    });
+                    userAnswer = allMatched ? selectedPairs : null;
+                } else if (q.type === 'equation_balancing') {
+                    const coefficients = [];
+                    let allCoefficientsFilled = true;
+                    qElement.querySelectorAll(`input.equation-balancing-input[data-question-id="${q.id}"]`).forEach(input => {
+                        const val = parseInt(input.value.trim());
+                        coefficients.push(isNaN(val) ? null : val);
+                        if (input.value.trim() === '' || isNaN(val)) {
+                            allCoefficientsFilled = false;
+                        }
+                    });
+                    userAnswer = allCoefficientsFilled ? coefficients : null;
+                }
+                userAnswers[q.id] = userAnswer;
+            });
+
+            const questionsForAI = currentQuizQuestions.map(q => {
+                const correct = quizCorrectAnswers[q.id]; 
+                const userAnswer = userAnswers[q.id];
+
+                let isCorrect = false;
+                if (userAnswer === null) { // Unanswered
+                    isCorrect = false;
+                } else if (q.type === 'multiple_choice' || q.type === 'true_false') {
+                    isCorrect = (userAnswer.toLowerCase() === correct.toLowerCase());
+                } else if (q.type === 'fill_in_the_blank') {
+                    isCorrect = true;
+                    for (const blankId in correct) {
+                        if (userAnswer[blankId].toLowerCase() !== correct[blankId].toLowerCase()) {
+                            isCorrect = false;
+                            break;
+                        }
+                    }
+                } else if (q.type === 'matching') {
+                    // Sort both arrays of pairs for consistent comparison
+                    const sortedUserPairs = [...userAnswer].sort((a,b) => a.item_id.localeCompare(b.item_id));
+                    const sortedCorrectPairs = [...correct].sort((a,b) => a.item_id.localeCompare(b.item_id));
+                    
+                    if (sortedUserPairs.length !== sortedCorrectPairs.length) {
+                        isCorrect = false;
+                    } else {
+                        isCorrect = sortedUserPairs.every((userPair, i) => 
+                            userPair.item_id === sortedCorrectPairs[i].item_id && 
+                            userPair.user_match_id === sortedCorrectPairs[i].match_id
+                        );
+                    }
+                } else if (q.type === 'equation_balancing') {
+                    isCorrect = true;
+                    if (userAnswer.length !== correct.length) {
+                        isCorrect = false;
+                    } else {
+                        for (let i = 0; i < correct.length; i++) {
+                            // Ensure both are numbers and equal.
+                            if (userAnswer[i] !== correct[i]) {
+                                isCorrect = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return {
+                    id: q.id,
+                    type: q.type,
+                    question_text: q.question_text,
+                    correct_answer: correct, 
+                    user_answer: userAnswer, 
+                    is_correct: isCorrect
+                };
+            });
+
+            // Modified prompt for Cấp 3 feedback
+            const feedbackPrompt = `Người dùng đã làm bài tập về chủ đề "${currentActiveTopic.content_title}" ở trình độ Hóa học cấp 3 (THPT). Dưới đây là thông tin chi tiết về các câu hỏi, đáp án đúng, và câu trả lời của người dùng:
+            
+            \`\`\`json
+            ${JSON.stringify(questionsForAI, null, 2)}
+            \`\`\`
+
+            Vui lòng phân tích từng câu trả lời của người dùng, có tính đến loại câu hỏi (type) và độ khó cấp 3.
+            - Nếu đúng, hãy khen ngợi và giải thích ngắn gọn tại sao đúng, củng cố kiến thức cấp 3.
+            - Nếu sai, hãy giải thích rõ tại sao câu trả lời đó sai và cung cấp gợi ý hoặc nhắc nhở về kiến thức liên quan đến cấp 3 để người dùng hiểu rõ hơn. Với câu điền từ, hãy chỉ rõ chỗ trống nào sai nếu có. Với câu nối cặp, hãy chỉ rõ cặp nào sai. Với câu cân bằng phương trình, hãy chỉ rõ hệ số nào sai.
+            - Nếu người dùng chưa trả lời (user_answer là null), hãy nhắc nhở họ hoàn thành câu hỏi.
+            
+            Trả về phản hồi dưới dạng JSON với cấu trúc sau:
+            \`\`\`json
+            {
+              "overall_feedback": "Tóm tắt chung về hiệu suất bài làm của người dùng, đưa ra lời khuyên chung, tập trung vào kiến thức cấp 3.",
+              "question_feedbacks": [
+                {
+                  "question_id": 1,
+                  "is_correct": true, // false
+                  "feedback_html": "HTML phản hồi cụ thể cho câu hỏi này, ví dụ: <p>Câu trả lời đúng! Giải thích...</p> hoặc <h4>Sai rồi!</h4><p>Giải thích tại sao sai và gợi ý...</p>"
+                },
+                // ... các phản hồi cho từng câu hỏi khác
+              ]
+            }
+            \`\`\`
+            Đảm bảo nội dung là tiếng Việt và không có bất kỳ văn bản nào ngoài khối JSON.
+            `;
+            
+            try {
+                const result = await chat.sendMessage(feedbackPrompt);
+                const fullResponseText = result.response.text();
+                
+                let feedbackData = null;
+                try {
+                    const jsonMatch = fullResponseText.match(/```json\n([\s\S]*?)\n```/);
+                    if (jsonMatch && jsonMatch[1]) {
+                        feedbackData = JSON.parse(jsonMatch[1]);
+                    } else {
+                        feedbackData = JSON.parse(fullResponseText);
+                    }
+                } catch (parseError) {
+                    console.error("Lỗi parse JSON phản hồi từ AI:", parseError);
+                    elements.quizFeedbackContent.innerHTML = '<p class="text-red-500">Lỗi: AI không trả về định dạng phản hồi JSON hợp lệ. Vui lòng thử lại.</p>';
+                    return;
+                }
+
+                if (!feedbackData || !feedbackData.question_feedbacks) {
+                    elements.quizFeedbackContent.innerHTML = '<p class="text-red-500">AI không thể cung cấp phản hồi. Vui lòng thử lại.</p>';
+                    return;
+                }
+
+                // Display overall feedback
+                elements.quizFeedbackContent.innerHTML = feedbackData.overall_feedback;
+                elements.quizFeedbackArea.classList.remove('hidden');
+
+                // Display individual question feedback
+                feedbackData.question_feedbacks.forEach(qFeedback => {
+                    const qElement = elements.quizContainer.querySelector(`.quiz-question[data-question-id="${qFeedback.question_id}"]`);
+                    if (qElement) {
+                        const feedbackDiv = qElement.querySelector('.quiz-question-feedback');
+                        if (feedbackDiv) {
+                            feedbackDiv.innerHTML = qFeedback.feedback_html;
+                            feedbackDiv.classList.remove('hidden');
+                            qElement.classList.add(qFeedback.is_correct ? 'correct' : 'incorrect');
+
+                            // Disable all inputs/radios/selects within this question
+                            qElement.querySelectorAll('input, select').forEach(input => {
+                                input.disabled = true;
+                            });
+                        }
+                    }
+                });
+                showMessage("Đã nhận phản hồi từ AI!", 3000);
+
+            } catch (error) {
+                console.error("Lỗi khi nhận phản hồi từ AI:", error);
+                elements.quizFeedbackContent.innerHTML = '<p class="text-red-500">Xin lỗi, đã xảy ra lỗi khi nhận phản hồi. Vui lòng thử lại.</p>';
+                showMessage(`Lỗi: ${error.message}`, 7000);
+            } finally {
+                elements.submitQuizBtn.disabled = false;
+                elements.aiLoadingIndicator.classList.add('hidden');
+                // Hide submit button after showing results
+                elements.submitQuizBtn.classList.add('hidden');
+            }
+        }
+
+        // --- Hàm xử lý Đăng ký ---
+        async function handleSignUp(e) {
+            e.preventDefault(); // Ngăn chặn form submit mặc định
+            const email = elements.emailInput.value;
+            const password = elements.passwordInput.value;
+
+            if (!email || !password) {
+                return showMessage("Vui lòng nhập đầy đủ Email và Mật khẩu.", 3000);
+            }
+
+            try {
+                showMessage("Đang đăng ký...", 0);
+                await createUserWithEmailAndPassword(auth, email, password);
+                showMessage("Đăng ký thành công! Bạn đã được đăng nhập.", 3000);
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        // --- Hàm xử lý Đăng nhập ---
+        async function handleSignIn(e) {
+            e.preventDefault(); // Ngăn chặn form submit mặc định
+            const email = elements.emailInput.value;
+            const password = elements.passwordInput.value;
+
+            if (!email || !password) {
+                return showMessage("Vui lòng nhập đầy đủ Email và Mật khẩu.", 3000);
+            }
+
+            try {
+                showMessage("Đang đăng nhập...", 0);
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage("Đăng nhập thành công!", 3000);
+            } catch (error) {
+                handleAuthError(error);
+            }
+        }
+
+        // --- Hàm xử lý Đăng xuất ---
+        async function handleSignOut() {
+            try {
+                showMessage("Đang đăng xuất...", 0);
+                await signOut(auth);
+                showMessage("Đã đăng xuất thành công!", 3000);
+            } catch (error) {
+                showMessage(`Lỗi khi đăng xuất: ${error.message}`, 5000);
+                console.error("Sign Out Error:", error);
+            }
+        }
+
+        // --- Hàm mở Modal nội dung ---
+        function openContentModal() {
+            let contentHtml = '';
+            let title = '';
+
+            // Determine which content to display based on active tab
+            if (!elements.lessonView.classList.contains('hidden')) {
+                contentHtml = elements.lessonContentArea.innerHTML;
+                title = elements.mainContentTitle.textContent;
+            } else if (!elements.exercisesView.classList.contains('hidden')) {
+                contentHtml = elements.quizContainer.innerHTML;
+                title = elements.mainContentTitle.textContent + " (Bài tập)";
+            } else {
+                showMessage("Vui lòng chọn một chủ đề hoặc bài tập để mở rộng.", 3000);
+                return;
+            }
+
+            elements.modalTitle.textContent = title;
+            elements.modalContentBody.innerHTML = contentHtml; // Copy content
+            elements.modalOverlay.classList.add('show');
+            document.body.style.overflow = 'hidden'; // Prevent scrolling background
+        }
+
+        // --- Hàm đóng Modal nội dung ---
+        function closeContentModal() {
+            elements.modalOverlay.classList.remove('show');
+            document.body.style.overflow = ''; // Restore scrolling
+            elements.modalContentBody.innerHTML = ''; // Clear content to free memory
+        }
+
+        // --- Khởi tạo ứng dụng ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theo dõi trạng thái xác thực
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    // User is signed in, show app content
+                    elements.authContainer.classList.add('hidden');
+                    elements.appContainer.classList.remove('hidden');
+                    elements.currentUserEmail.textContent = `Xin chào, ${user.email}`;
+                    // Initial message in content area will guide user.
+                } else {
+                    // User is signed out, show auth content
+                    elements.authContainer.classList.remove('hidden');
+                    elements.appContainer.classList.add('hidden');
+                    elements.currentUserEmail.textContent = '';
+                }
+            });
+            
+            // Event Listeners for Auth
+            elements.signInBtn.addEventListener('click', handleSignIn);
+            elements.signUpBtn.addEventListener('click', handleSignUp);
+            elements.signOutBtn.addEventListener('click', handleSignOut);
+            
+            // Event Listeners for Tabs
+            elements.lessonTab.addEventListener('click', () => showView('lessonView'));
+            elements.exercisesTab.addEventListener('click', () => {
+                showView('exercisesView');
+                // Optionally clear previous quiz feedback when switching back to exercises tab
+                elements.quizFeedbackArea.classList.add('hidden');
+                elements.submitQuizBtn.classList.add('hidden'); // Hide submit button until new quiz generated
+            });
+
+            // Event Listener for Generate Topic Button (new functionality)
+            elements.generateTopicBtn.addEventListener('click', async () => {
+                const topicTitle = elements.topicInput.value.trim();
+                if (!topicTitle) {
+                    return showMessage("Vui lòng nhập tiêu đề bài học.", 3000);
+                }
+
+                // Clear previous states
+                elements.lessonContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Đang tạo nội dung bài học...</p>';
+                elements.aiExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về nội dung bài học hoặc các thuật ngữ sẽ hiển thị ở đây...</p>';
+                elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Mới" để AI tạo các câu hỏi cho bài học hiện tại.</p>';
+                elements.quizFeedbackArea.classList.add('hidden');
+                elements.submitQuizBtn.classList.add('hidden');
+                
+                elements.generateTopicBtn.disabled = true;
+                elements.generateTopicBtnText.textContent = 'Đang xử lý...';
+                elements.generateTopicSpinner.classList.remove('hidden');
+
+                // Tạo một đối tượng topic tạm thời với target_content được điều chỉnh cho Cấp 3
+                currentActiveTopic = {
+                    id: topicTitle.toLowerCase().replace(/\s+/g, '-'), // Tạo ID đơn giản từ tiêu đề
+                    title: topicTitle,
+                    content_title: topicTitle,
+                    description: `Nội dung về ${topicTitle} (Cấp 3)`,
+                    target_content: `Giải thích chi tiết về "${topicTitle}", bao gồm các khái niệm nâng cao, các phản ứng hóa học phức tạp, cơ chế phản ứng (nếu có), các bài toán tính toán chuyên sâu, và các ví dụ minh họa phù hợp với chương trình Hóa học cấp 3 (THPT). Đảm bảo độ khó và chiều sâu kiến thức ở mức cao.`
+                };
+                
+                elements.mainContentTitle.textContent = currentActiveTopic.title;
+                await loadLessonContent(currentActiveTopic); // Tải bài học
+                showView('lessonView'); // Đảm bảo hiển thị tab bài học
+            });
+
+            // Event Listener for Generate Exercises Button
+            elements.generateExercisesBtn.addEventListener('click', () => {
+                if (currentActiveTopic) {
+                    loadExercises(currentActiveTopic);
+                } else {
+                    showMessage("Vui lòng tạo một bài học trước khi tạo bài tập.", 3000);
+                }
+            });
+
+            // Event Listener for Submit Quiz Button
+            elements.submitQuizBtn.addEventListener('click', submitQuiz);
+
+            // Event Listeners for new Modal functionality
+            elements.expandContentBtn.addEventListener('click', openContentModal);
+            elements.modalCloseBtn.addEventListener('click', closeContentModal);
+            // Close modal if click on overlay
+            elements.modalOverlay.addEventListener('click', (e) => {
+                if (e.target === elements.modalOverlay) {
+                    closeContentModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
