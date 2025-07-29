@@ -908,11 +908,11 @@
 
             let promptDescription = "";
             if (quizCategory === 'theoretical') {
-                promptDescription = "Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về **lý thuyết** của chủ đề";
+                promptDescription = "Hãy tạo 3-5 câu hỏi hóa học cấp 3 (THPT) về **lý thuyết** của chủ đề";
             } else if (quizCategory === 'calculation') {
-                promptDescription = "Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về **bài tập tính toán**, bao gồm các bài toán có lời văn, yêu cầu tính toán số liệu và đưa ra đáp án dưới dạng số hoặc lựa chọn số, của chủ đề";
+                promptDescription = "Hãy tạo 3-5 câu hỏi hóa học cấp 3 (THPT) về **bài tập tính toán**, bao gồm các bài toán có lời văn, yêu cầu tính toán số liệu và đưa ra đáp án dưới dạng số hoặc lựa chọn số, của chủ đề";
             } else {
-                promptDescription = "Hãy tạo 5-7 câu hỏi hóa học cấp 3 (THPT) về chủ đề"; // Fallback for general
+                promptDescription = "Hãy tạo 3-5 câu hỏi hóa học cấp 3 (THPT) về chủ đề"; // Fallback for general
             }
 
             const userPrompt = `${promptDescription} "${topic.content_title}" cho học sinh trung học tại Việt Nam.
