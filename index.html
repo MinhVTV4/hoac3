@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -46,16 +47,16 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Styles for AI-generated content area */
-        #lessonContentArea, #quizContainer {
+        /* Styles for AI-generated content area - UPDATED */
+        #lessonContentArea, #quizContainer, #tipsView, #storiesView {
             /* Adjusted for more content visibility */
             max-height: calc(100vh - 200px); /* Increased available height for content */
             overflow-y: auto;
             word-wrap: break-word; /* Ensure long words break */
         }
         
-        /* Ensure code blocks look good */
-        #lessonContentArea pre, #quizFeedbackArea pre {
+        /* Ensure code blocks look good - UPDATED */
+        #lessonContentArea pre, #quizFeedbackArea pre, #tipsView pre, #storiesView pre {
             background-color: #eceff1; /* Material Blue Grey 50 - slightly darker than grey 100 */
             padding: 1.25rem; /* Increased padding */
             border-radius: 0.5rem;
@@ -66,8 +67,8 @@
             border-left: 5px solid #607d8b; /* Distinct left border for code blocks (Material Blue Grey 700) */
         }
 
-        /* Basic styling for headings/paragraphs within AI content */
-        #lessonContentArea h2, #quizContainer h2, #quizFeedbackArea h2 {
+        /* Basic styling for headings/paragraphs within AI content - UPDATED */
+        #lessonContentArea h2, #quizContainer h2, #quizFeedbackArea h2, #tipsView h2, #storiesView h2 {
             font-size: 1.875rem; /* text-3xl */
             font-weight: 700; /* font-bold */
             margin-top: 2rem; /* Increased margin for better separation */
@@ -76,30 +77,30 @@
             border-bottom: 1px solid #e0e0e0; /* Subtle border below heading */
             color: #212121; /* text-gray-900 */
         }
-        #lessonContentArea h3, #quizContainer h3, #quizFeedbackArea h3 {
+        #lessonContentArea h3, #quizContainer h3, #quizFeedbackArea h3, #tipsView h3, #storiesView h3 {
             font-size: 1.5rem; /* text-2xl */
             font-weight: 600; /* font-semibold */
             margin-top: 1.5rem; /* Increased margin */
             margin-bottom: 1rem; /* Adjusted margin */
             color: #424242; /* text-gray-800 */
         }
-        #lessonContentArea p, #quizContainer p, #quizFeedbackArea p {
+        #lessonContentArea p, #quizContainer p, #quizFeedbackArea p, #tipsView p, #storiesView p {
             font-size: 1.05rem; /* Slightly larger font for readability */
             margin-bottom: 1rem; /* Increased margin */
             line-height: 1.6;
             color: #424242; /* text-gray-700 */
         }
-        #lessonContentArea ul, #lessonContentArea ol, #quizContainer ul, #quizContainer ol, #quizFeedbackArea ul, #quizFeedbackArea ol {
+        #lessonContentArea ul, #lessonContentArea ol, #quizContainer ul, #quizContainer ol, #quizFeedbackArea ul, #quizFeedbackArea ol, #tipsView ul, #tipsView ol, #storiesView ul, #storiesView ol {
             margin-left: 2rem; /* Increased indentation for lists */
             margin-bottom: 1rem; /* Increased margin */
             list-style-position: inside;
         }
-        #lessonContentArea li, #quizContainer li, #quizFeedbackArea li {
+        #lessonContentArea li, #quizContainer li, #quizFeedbackArea li, #tipsView li, #storiesView li {
             font-size: 1.05rem; /* Slightly larger font for readability */
             margin-bottom: 0.5rem; /* Increased margin */
             color: #424242;
         }
-        #lessonContentArea strong, #quizContainer strong, #quizFeedbackArea strong {
+        #lessonContentArea strong, #quizContainer strong, #quizFeedbackArea strong, #tipsView strong, #storiesView strong {
             font-weight: 700;
         }
 
@@ -437,10 +438,12 @@
             <section class="bg-white p-8 rounded-xl shadow-xl col-span-1 lg:col-span-8 flex flex-col border border-gray-200">
                 <h2 class="text-3xl font-bold mb-6 text-gray-800" id="mainContentTitle">Nội Dung</h2>
                 
-                <!-- Tabs for Lesson/Exercises and Expand Button -->
+                <!-- Tabs for Lesson/Exercises and Expand Button - UPDATED -->
                 <div class="flex items-center border-b border-gray-200 mb-6">
                     <button id="lessonTab" class="py-2 px-4 text-lg font-medium text-gray-700 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600 active-tab">Bài học</button>
                     <button id="exercisesTab" class="py-2 px-4 text-lg font-medium text-gray-700 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600">Bài tập</button>
+                    <button id="tipsTab" class="py-2 px-4 text-lg font-medium text-gray-700 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600">Tip hay</button>
+                    <button id="storiesTab" class="py-2 px-4 text-lg font-medium text-gray-700 border-b-2 border-transparent hover:border-indigo-600 hover:text-indigo-600">Câu chuyện khoa học</button>
                     <button id="expandContentBtn" class="ml-auto py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg shadow-sm flex items-center gap-2 transition duration-200 text-base">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15.75M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 16.5v-4.5m0 4.5h-4.5m4.5 0L15 15.75" />
@@ -489,6 +492,32 @@
                         <label class="block text-gray-700 text-base font-bold mb-2">Phản hồi từ AI:</label>
                         <div id="quizFeedbackContent" class="w-full min-h-[50px] p-4 bg-blue-50 border border-blue-200 rounded-lg overflow-y-auto text-sm text-gray-700 leading-relaxed">
                             <p class="text-gray-500">Phản hồi của AI về kết quả bài làm của bạn sẽ hiển thị ở đây.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content for Tips - NEW -->
+                <div id="tipsView" class="hidden flex-grow flex-col">
+                    <div id="tipsContentArea" class="flex-grow bg-gray-50 p-6 rounded-lg border border-gray-300 shadow-inner text-gray-800 leading-relaxed overflow-y-auto">
+                        <p class="text-gray-500 text-center text-lg">Chọn một chủ đề bài học ở bên trái để xem các mẹo học tập thú vị!</p>
+                    </div>
+                    <div class="mt-6 mb-4 bg-white p-6 rounded-xl shadow-lg border border-gray-200 border-l-4 border-purple-600">
+                        <label class="block text-gray-700 text-base font-bold mb-2">Giải thích từ AI (nếu có):</label>
+                        <div id="tipsExplanationBox" class="w-full min-h-[50px] p-4 bg-purple-50 border border-purple-200 rounded-lg overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                            <p class="text-gray-500">Giải thích chi tiết về các mẹo sẽ hiển thị ở đây...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content for Stories - NEW -->
+                <div id="storiesView" class="hidden flex-grow flex-col">
+                    <div id="storiesContentArea" class="flex-grow bg-gray-50 p-6 rounded-lg border border-gray-300 shadow-inner text-gray-800 leading-relaxed overflow-y-auto">
+                        <p class="text-gray-500 text-center text-lg">Chọn một chủ đề bài học ở bên trái để khám phá những câu chuyện khoa học thú vị!</p>
+                    </div>
+                    <div class="mt-6 mb-4 bg-white p-6 rounded-xl shadow-lg border border-gray-200 border-l-4 border-purple-600">
+                        <label class="block text-gray-700 text-base font-bold mb-2">Giải thích từ AI (nếu có):</label>
+                        <div id="storiesExplanationBox" class="w-full min-h-[50px] p-4 bg-purple-50 border border-purple-200 rounded-lg overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                            <p class="text-gray-500">Giải thích chi tiết về câu chuyện sẽ hiển thị ở đây...</p>
                         </div>
                     </div>
                 </div>
@@ -566,7 +595,7 @@
             showMessage("Lỗi khởi tạo AI Model. Kiểm tra Console và cấu hình Firebase.", 7000);
         }
 
-        // --- Tham chiếu DOM ---
+        // --- Tham chiếu DOM - UPDATED ---
         const elements = {
             // Auth elements
             authContainer: document.getElementById('authContainer'),
@@ -593,8 +622,17 @@
 
             lessonTab: document.getElementById('lessonTab'),
             exercisesTab: document.getElementById('exercisesTab'),
+            tipsTab: document.getElementById('tipsTab'), // NEW
+            storiesTab: document.getElementById('storiesTab'), // NEW
+
             lessonView: document.getElementById('lessonView'),
             exercisesView: document.getElementById('exercisesView'),
+            tipsView: document.getElementById('tipsView'), // NEW
+            tipsContentArea: document.getElementById('tipsContentArea'), // NEW
+            tipsExplanationBox: document.getElementById('tipsExplanationBox'), // NEW
+            storiesView: document.getElementById('storiesView'), // NEW
+            storiesContentArea: document.getElementById('storiesContentArea'), // NEW
+            storiesExplanationBox: document.getElementById('storiesExplanationBox'), // NEW
             
             // New: Specific exercise generation buttons
             generateTheoreticalExercisesBtn: document.getElementById('generateTheoreticalExercisesBtn'),
@@ -667,18 +705,27 @@
             console.error("Firebase Auth Error:", error);
         }
 
-        // --- Hàm quản lý hiển thị các view (Bài học/Bài tập) ---
+        // --- Hàm quản lý hiển thị các view (Bài học/Bài tập/Tip hay/Câu chuyện) - UPDATED ---
         function showView(viewId) {
             elements.lessonView.classList.add('hidden');
             elements.exercisesView.classList.add('hidden');
+            elements.tipsView.classList.add('hidden'); // NEW
+            elements.storiesView.classList.add('hidden'); // NEW
+
             elements.lessonTab.classList.remove('active-tab');
             elements.exercisesTab.classList.remove('active-tab');
+            elements.tipsTab.classList.remove('active-tab'); // NEW
+            elements.storiesTab.classList.remove('active-tab'); // NEW
 
             document.getElementById(viewId).classList.remove('hidden');
             if (viewId === 'lessonView') {
                 elements.lessonTab.classList.add('active-tab');
             } else if (viewId === 'exercisesView') {
                 elements.exercisesTab.classList.add('active-tab');
+            } else if (viewId === 'tipsView') { // NEW
+                elements.tipsTab.classList.add('active-tab');
+            } else if (viewId === 'storiesView') { // NEW
+                elements.storiesTab.classList.add('active-tab');
             }
         }
 
@@ -1050,6 +1097,118 @@
             }
         }
 
+        // --- Tải nội dung "Tip hay" bằng AI - NEW ---
+        async function loadTipsContent(topic) {
+            if (!aiModel) {
+                return showMessage("Mô hình AI chưa sẵn sàng. Vui lòng kiểm tra cấu hình.", 5000);
+            }
+            if (!topic) {
+                return showMessage("Vui lòng nhập tiêu đề bài học để tạo mẹo học tập.", 3000);
+            }
+
+            elements.tipsContentArea.innerHTML = ''; 
+            elements.tipsExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về các mẹo sẽ hiển thị ở đây...</p>';
+            elements.aiLoadingIndicator.classList.remove('hidden'); 
+            elements.aiLoadingText.textContent = `AI đang tạo các mẹo học tập cho chủ đề: "${topic.content_title}"...`;
+            showMessage(`Đang tạo mẹo học tập cho chủ đề: "${topic.content_title}"...`, 0); 
+
+            initializeAIChat(topic.id); // Khởi tạo/tái sử dụng phiên chat cho chủ đề này
+
+            try {
+                const userPrompt = `Hãy tạo 3-5 "Tip hay" (mẹo học tập, sự thật thú vị hoặc các 'fact' nhanh) liên quan đến chủ đề hóa học cấp 3 (THPT) "${topic.content_title}" cho học sinh.
+                Trình bày nội dung dưới dạng HTML sạch sẽ, dễ đọc.
+                Sử dụng các thẻ như:
+                -   \`<h2>\`, \`<h3>\` cho tiêu đề phụ.
+                -   \`<p>\` cho đoạn văn.
+                -   \`<ul>\`/\`<ol>\` cho danh sách.
+                -   \`<strong>\` cho từ khóa quan trọng.
+                
+                Đừng bao gồm thẻ \`<html>\`, \`<head>\`, \`<body>\`, chỉ trả về phần nội dung HTML.
+                Sau phần nội dung HTML, thêm một dòng phân cách "---CODE---" và sau đó là một đoạn giải thích ngắn gọn bằng tiếng Việt về tổng quan các mẹo này.`
+                
+                const result = await chat.sendMessage(userPrompt);
+                const fullResponseText = result.response.text();
+
+                const separator = '---CODE---';
+                let tipsHtml = fullResponseText;
+                let explanation = "AI không cung cấp giải thích thêm.";
+
+                if (fullResponseText.includes(separator)) {
+                    const parts = fullResponseText.split(separator);
+                    tipsHtml = parts[0].trim();
+                    explanation = parts.slice(1).join(separator).trim();
+                }
+                
+                elements.tipsContentArea.innerHTML = tipsHtml;
+                elements.tipsExplanationBox.innerHTML = explanation.replace(/\n/g, '<br>');
+                showMessage("Đã tải các mẹo học tập thành công!", 3000);
+
+            } catch (error) {
+                console.error("Lỗi khi tải mẹo học tập từ AI:", error);
+                elements.tipsContentArea.innerHTML = '<p class="text-red-500">Xin lỗi, đã xảy ra lỗi khi tải mẹo học tập. Vui lòng thử lại.</p>';
+                elements.tipsExplanationBox.innerHTML = '<p class="text-red-500">Lỗi: ' + error.message + '</p>';
+                showMessage(`Lỗi: ${error.message}`, 7000);
+            } finally {
+                elements.aiLoadingIndicator.classList.add('hidden');
+            }
+        }
+
+        // --- Tải nội dung "Câu chuyện khoa học" bằng AI - NEW ---
+        async function loadStoriesContent(topic) {
+            if (!aiModel) {
+                return showMessage("Mô hình AI chưa sẵn sàng. Vui lòng kiểm tra cấu hình.", 5000);
+            }
+            if (!topic) {
+                return showMessage("Vui lòng nhập tiêu đề bài học để tạo câu chuyện khoa học.", 3000);
+            }
+
+            elements.storiesContentArea.innerHTML = ''; 
+            elements.storiesExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về câu chuyện sẽ hiển thị ở đây...</p>';
+            elements.aiLoadingIndicator.classList.remove('hidden'); 
+            elements.aiLoadingText.textContent = `AI đang tạo các câu chuyện khoa học cho chủ đề: "${topic.content_title}"...`;
+            showMessage(`Đang tạo câu chuyện khoa học cho chủ đề: "${topic.content_title}"...`, 0); 
+
+            initializeAIChat(topic.id); // Khởi tạo/tái sử dụng phiên chat cho chủ đề này
+
+            try {
+                const userPrompt = `Hãy tạo một hoặc hai "câu chuyện khoa học, phát minh, hoặc về các nhà khoa học nổi tiếng" có liên quan mật thiết đến chủ đề hóa học cấp 3 (THPT) "${topic.content_title}".
+                Câu chuyện cần có tính giáo dục, truyền cảm hứng và phù hợp với học sinh trung học.
+                Trình bày nội dung dưới dạng HTML sạch sẽ, dễ đọc.
+                Sử dụng các thẻ như:
+                -   \`<h2>\`, \`<h3>\` cho tiêu đề phụ.
+                -   \`<p>\` cho đoạn văn.
+                -   \`<strong>\` cho tên nhà khoa học hoặc phát minh quan trọng.
+                
+                Đừng bao gồm thẻ \`<html>\`, \`<head>\`, \`<body>\`, chỉ trả về phần nội dung HTML.
+                Sau phần nội dung HTML, thêm một dòng phân cách "---CODE---" và sau đó là một đoạn giải thích ngắn gọn bằng tiếng Việt về ý nghĩa của câu chuyện hoặc tầm quan trọng của phát minh/nhà khoa học này.`
+                
+                const result = await chat.sendMessage(userPrompt);
+                const fullResponseText = result.response.text();
+
+                const separator = '---CODE---';
+                let storiesHtml = fullResponseText;
+                let explanation = "AI không cung cấp giải thích thêm.";
+
+                if (fullResponseText.includes(separator)) {
+                    const parts = fullResponseText.split(separator);
+                    storiesHtml = parts[0].trim();
+                    explanation = parts.slice(1).join(separator).trim();
+                }
+                
+                elements.storiesContentArea.innerHTML = storiesHtml;
+                elements.storiesExplanationBox.innerHTML = explanation.replace(/\n/g, '<br>');
+                showMessage("Đã tải câu chuyện khoa học thành công!", 3000);
+
+            } catch (error) {
+                console.error("Lỗi khi tải câu chuyện khoa học từ AI:", error);
+                elements.storiesContentArea.innerHTML = '<p class="text-red-500">Xin lỗi, đã xảy ra lỗi khi tải câu chuyện khoa học. Vui lòng thử lại.</p>';
+                elements.storiesExplanationBox.innerHTML = '<p class="text-red-500">Lỗi: ' + error.message + '</p>';
+                showMessage(`Lỗi: ${error.message}`, 7000);
+            } finally {
+                elements.aiLoadingIndicator.classList.add('hidden');
+            }
+        }
+
         // --- Nộp bài và nhận phản hồi từ AI ---
         async function submitQuiz() {
             if (!chat) {
@@ -1304,7 +1463,7 @@
             }
         }
 
-        // --- Hàm mở Modal nội dung ---
+        // --- Hàm mở Modal nội dung - UPDATED ---
         function openContentModal() {
             let contentHtml = '';
             let title = '';
@@ -1316,7 +1475,14 @@
             } else if (!elements.exercisesView.classList.contains('hidden')) {
                 contentHtml = elements.quizContainer.innerHTML;
                 title = elements.mainContentTitle.textContent + " (Bài tập)";
-            } else {
+            } else if (!elements.tipsView.classList.contains('hidden')) { // NEW
+                contentHtml = elements.tipsContentArea.innerHTML;
+                title = elements.mainContentTitle.textContent + " (Tip hay)";
+            } else if (!elements.storiesView.classList.contains('hidden')) { // NEW
+                contentHtml = elements.storiesContentArea.innerHTML;
+                title = elements.mainContentTitle.textContent + " (Câu chuyện khoa học)";
+            }
+             else {
                 showMessage("Vui lòng chọn một chủ đề hoặc bài tập để mở rộng.", 3000);
                 return;
             }
@@ -1357,7 +1523,7 @@
             elements.signUpBtn.addEventListener('click', handleSignUp);
             elements.signOutBtn.addEventListener('click', handleSignOut);
             
-            // Event Listeners for Tabs
+            // Event Listeners for Tabs - UPDATED
             elements.lessonTab.addEventListener('click', () => showView('lessonView'));
             elements.exercisesTab.addEventListener('click', () => {
                 showView('exercisesView');
@@ -1367,6 +1533,26 @@
                 // Ensure the appropriate message is shown in quizContainer
                 elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Lý Thuyết" hoặc "Tạo Bài Tập Tính Toán" để AI tạo các câu hỏi cho bài học hiện tại.</p>';
             });
+            elements.tipsTab.addEventListener('click', () => { // NEW
+                showView('tipsView');
+                if (currentActiveTopic) {
+                    loadTipsContent(currentActiveTopic);
+                } else {
+                    showMessage("Vui lòng tạo một bài học trước khi xem mẹo học tập.", 3000);
+                    elements.tipsContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Chọn một chủ đề bài học ở bên trái để xem các mẹo học tập thú vị!</p>';
+                    elements.tipsExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về các mẹo sẽ hiển thị ở đây...</p>';
+                }
+            });
+            elements.storiesTab.addEventListener('click', () => { // NEW
+                showView('storiesView');
+                if (currentActiveTopic) {
+                    loadStoriesContent(currentActiveTopic);
+                } else {
+                    showMessage("Vui lòng tạo một bài học trước khi xem câu chuyện khoa học.", 3000);
+                    elements.storiesContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Chọn một chủ đề bài học ở bên trái để khám phá những câu chuyện khoa học thú vị!</p>';
+                    elements.storiesExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về câu chuyện sẽ hiển thị ở đây...</p>';
+                }
+            });
 
             // Event Listener for Generate Topic Button (new functionality)
             elements.generateTopicBtn.addEventListener('click', async () => {
@@ -1375,10 +1561,15 @@
                     return showMessage("Vui lòng nhập tiêu đề bài học.", 3000);
                 }
 
-                // Clear previous states
+                // Clear previous states and reset messages for all content areas - UPDATED
                 elements.lessonContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Đang tạo nội dung bài học...</p>';
                 elements.aiExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về nội dung bài học hoặc các thuật ngữ sẽ hiển thị ở đây...</p>';
-                elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Lý Thuyết" hoặc "Tạo Bài Tập Tính Toán" để AI tạo các câu hỏi cho bài học hiện tại.</p>'; // Updated message
+                elements.quizContainer.innerHTML = '<p class="text-gray-500 text-center text-lg">Nhấn "Tạo Bài Tập Lý Thuyết" hoặc "Tạo Bài Tập Tính Toán" để AI tạo các câu hỏi cho bài học hiện tại.</p>';
+                elements.tipsContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Đang tạo mẹo học tập...</p>'; // NEW
+                elements.tipsExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về các mẹo sẽ hiển thị ở đây...</p>'; // NEW
+                elements.storiesContentArea.innerHTML = '<p class="text-gray-500 text-center text-lg">Đang tạo câu chuyện khoa học...</p>'; // NEW
+                elements.storiesExplanationBox.innerHTML = '<p class="text-gray-500">Giải thích chi tiết về câu chuyện sẽ hiển thị ở đây...</p>'; // NEW
+
                 elements.quizFeedbackArea.classList.add('hidden');
                 elements.submitQuizBtn.classList.add('hidden');
                 
